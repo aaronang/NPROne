@@ -1,5 +1,11 @@
 import React from 'react';
-import { Text, View, TouchableOpacity, StyleSheet, Easing } from 'react-native';
+import {
+  Text,
+  View,
+  TouchableOpacity,
+  StyleSheet,
+  Dimensions
+} from 'react-native';
 import { downloadRecommendations, downloadItem } from '../lib/media';
 import Sound from 'react-native-sound';
 import * as Progress from 'react-native-progress';
@@ -39,18 +45,15 @@ export default class Play extends React.Component {
 
   _play = () => {
     const { sound, playlist, index } = this.state;
+
     if (sound) {
       this.setState({ playing: true });
-      sound.play(this._onFinish);
-      return;
+      sound.play(this._onPlayFinish);
+    } else {
+      this.setState({ downloading: true });
+      const { download, filepath } = downloadItem(playlist[index]);
+      download.then(() => this._onDownloadFinish(filepath));
     }
-
-    this.setState({ downloading: true });
-    const { download, filepath } = downloadItem(playlist[index]);
-    download.then(() => {
-      this.setState({ downloading: false });
-      this._onDownloadFinish(filepath);
-    });
   };
 
   _pause = () => {
@@ -58,18 +61,17 @@ export default class Play extends React.Component {
     this.setState({ playing: false });
   };
 
-  _onFinish = success => {
+  _onPlayFinish = success => {
     const { sound, index, playlist } = this.state;
     this.setState({ playing: false, progress: 1 });
 
-    if (!success) {
-      sound.reset();
-    } else {
+    if (success) {
       const newIndex = (index + 1) % playlist.length;
-      this.setState({ index: newIndex });
-
+      this.setState({ index: newIndex, downloading: true });
       const { download, filepath } = downloadItem(playlist[newIndex]);
-      download.then(this._onDownloadFinish(filepath));
+      download.then(() => this._onDownloadFinish(filepath));
+    } else {
+      sound.reset();
     }
   };
 
@@ -78,8 +80,8 @@ export default class Play extends React.Component {
       if (error) {
         console.error(error);
       }
-      this.setState({ sound: sound, playing: true });
-      sound.play(this._onFinish);
+      this.setState({ sound: sound, playing: true, downloading: false });
+      sound.play(this._onPlayFinish);
     });
   };
 
@@ -100,8 +102,8 @@ export default class Play extends React.Component {
   };
 
   _updateProgressBar = () => {
-    const { playing, sound } = this.state;
-    if (playing) {
+    const { sound } = this.state;
+    if (sound) {
       const duration = sound.getDuration();
       sound.getCurrentTime(seconds => {
         this.setState({ progress: seconds / duration });
@@ -127,6 +129,15 @@ export default class Play extends React.Component {
     return ' ';
   };
 
+  _onProgressPress = event => {
+    const width = Dimensions.get('window').width - 2 * padding;
+    const { locationX } = event.nativeEvent;
+    const { sound, downloading } = this.state;
+    if (sound && !downloading) {
+      sound.setCurrentTime(locationX / width * sound.getDuration());
+    }
+  };
+
   render() {
     return (
       <View style={[styles.container, styles.root]}>
@@ -141,11 +152,17 @@ export default class Play extends React.Component {
               <Text style={styles.title}>{this._getCurrentTitle()}</Text>
             </View>
             <View style={styles.progress}>
-              <Progress.Bar
-                progress={this.state.progress}
-                width={null}
-                animated={false}
-              />
+              <TouchableOpacity
+                onPress={this._onProgressPress}
+                activeOpacity={1}
+                style={styles.touchBar}
+              >
+                <Progress.Bar
+                  progress={this.state.progress}
+                  width={null}
+                  animated={false}
+                />
+              </TouchableOpacity>
             </View>
           </View>
         </TouchableOpacity>
@@ -154,12 +171,13 @@ export default class Play extends React.Component {
   }
 }
 
+const padding = 50;
 const styles = StyleSheet.create({
   container: {
     flex: 1
   },
   root: {
-    padding: 50,
+    padding: padding,
     paddingTop: 200
   },
   info: {
@@ -171,9 +189,13 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    textAlign: 'center'
   },
   progress: {
     flex: 1
+  },
+  touchBar: {
+    height: 12
   }
 });
