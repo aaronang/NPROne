@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  Text,
   View,
   TouchableOpacity,
   StyleSheet,
@@ -11,7 +10,8 @@ import { downloadRecommendations, downloadItem } from '../lib/media';
 import { signOut } from '../lib/auth';
 import PropTypes from 'prop-types';
 import Sound from 'react-native-sound';
-import * as Progress from 'react-native-progress';
+import Info from '../components/Info';
+import TouchableProgressBar from '../components/TouchableProgressBar';
 
 export default class Play extends React.Component {
   static navigationOptions = {
@@ -156,23 +156,11 @@ export default class Play extends React.Component {
           activeOpacity={1}
         >
           <View style={styles.container}>
-            <View style={styles.info}>
-              <Text style={styles.status}>{this._getStatus()}</Text>
-              <Text style={styles.title}>{this._getCurrentTitle()}</Text>
-            </View>
-            <View style={styles.progress}>
-              <TouchableOpacity
-                onPress={this._onProgressPress}
-                activeOpacity={1}
-                style={styles.touchBar}
-              >
-                <Progress.Bar
-                  progress={this.state.progress}
-                  width={null}
-                  animated={false}
-                />
-              </TouchableOpacity>
-            </View>
+            <Info status={this._getStatus()} title={this._getCurrentTitle()} />
+            <TouchableProgressBar
+              onProgressPress={this._onProgressPress}
+              progress={this.state.progress}
+            />
             <View>
               <Button onPress={this._signOut} title="Sign Out" />
             </View>
@@ -197,23 +185,5 @@ const styles = StyleSheet.create({
   root: {
     padding: padding,
     paddingTop: 200
-  },
-  info: {
-    alignItems: 'center',
-    flex: 1
-  },
-  status: {
-    fontSize: 12
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center'
-  },
-  progress: {
-    flex: 1
-  },
-  touchBar: {
-    height: 12
   }
 });
