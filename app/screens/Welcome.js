@@ -6,7 +6,7 @@ import {
 } from 'react-native';
 import { exchangeToken, signIn, setAccessToken } from '../lib/auth'
 
-export default class SplashScreen extends React.Component {
+export default class Welcome extends React.Component {
   static navigationOptions = {
     header: null
   };

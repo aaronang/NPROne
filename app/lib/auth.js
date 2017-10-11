@@ -15,7 +15,7 @@ export const setAccessToken = (token) => AsyncStorage.setItem(ACCESS_TOKEN, JSON
 export const getAccessToken = async () => {
   try {
     const accessToken = await AsyncStorage.getItem(ACCESS_TOKEN)
-    return accessToken
+    return JSON.parse(accessToken)
   } catch (err) {
     console.log(err)
   }

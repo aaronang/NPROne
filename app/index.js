@@ -14,10 +14,10 @@ export default class App extends React.Component {
   }
 
   async componentWillMount() {
-    this.checkAuth()
+    this._checkAuth()
   }
 
-  async checkAuth() {
+  _checkAuth = async () => {
     try {
       const authenticated = await isSignedIn()
       this.setState({ authenticated: authenticated, loading: false })
@@ -32,6 +32,6 @@ export default class App extends React.Component {
     }
 
     const Layout = createRootNavigation(this.state.authenticated)
-    return <Layout screenProps={{ checkAuth: () => this.checkAuth() }} />
+    return <Layout screenProps={{ checkAuth: () => this._checkAuth() }} />
   }
 }

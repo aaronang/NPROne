@@ -1,22 +1,22 @@
 import React from "react";
 import { StackNavigator, TabNavigator } from "react-navigation";
 
-import SplashScreen from "./screens/SplashScreen";
-import LoginScreen from "./screens/LoginScreen";
-import HomeScreen from './screens/HomeScreen';
+import Welcome from "./screens/Welcome";
+import Login from "./screens/Login";
+import Play from './screens/Play';
 
 export const SignedOut = StackNavigator({
-  Splash: {
-    screen: SplashScreen,
+  Welcome: {
+    screen: Welcome,
   },
   Login: {
-    screen: LoginScreen,
+    screen: Login,
   }
 });
 
-export const SignedIn = TabNavigator({
-  Home: {
-    screen: HomeScreen,
+export const SignedIn = StackNavigator({
+  Play: {
+    screen: Play
   }
 });
 
