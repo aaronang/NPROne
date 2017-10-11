@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Button } from 'react-native';
+import { View, Button, StyleSheet } from 'react-native';
 import PropTypes from 'prop-types';
 
 export default class Welcome extends React.Component {
@@ -10,7 +10,7 @@ export default class Welcome extends React.Component {
   render() {
     const { navigate } = this.props.navigation;
     return (
-      <View>
+      <View style={styles.container}>
         <Button onPress={() => navigate('Login')} title="Sign In" />
       </View>
     );
@@ -22,3 +22,9 @@ Welcome.propTypes = {
     navigate: PropTypes.func.isRequired
   }).isRequired
 };
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 50
+  }
+});

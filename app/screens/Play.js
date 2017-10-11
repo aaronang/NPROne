@@ -1,7 +1,8 @@
 import React from 'react';
-import { Text, View, TouchableHighlight } from 'react-native';
+import { Text, View, TouchableOpacity, StyleSheet, Easing } from 'react-native';
 import { downloadRecommendations, downloadItem } from '../lib/media';
 import Sound from 'react-native-sound';
+import * as Progress from 'react-native-progress';
 
 export default class Play extends React.Component {
   static navigationOptions = {
@@ -14,10 +15,20 @@ export default class Play extends React.Component {
       playlist: [],
       index: 0,
       lastPress: 0,
+      progress: 0,
       downloading: false,
       playing: false,
       sound: null
     };
+  }
+
+  componentDidMount() {
+    const timer = setInterval(() => this._updateProgressBar(), 100);
+    this.setState({ timer: timer });
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.state.timer);
   }
 
   _downloadRecommendations = async () => {
@@ -48,15 +59,18 @@ export default class Play extends React.Component {
   };
 
   _onFinish = success => {
-    this.setState({ playing: false });
-    if (!success) this.state.sound.reset();
+    const { sound, index, playlist } = this.state;
+    this.setState({ playing: false, progress: 1 });
 
-    const { index, playlist } = this.state;
-    const newIndex = (index + 1) % playlist.length;
-    this.setState({ index: newIndex });
+    if (!success) {
+      sound.reset();
+    } else {
+      const newIndex = (index + 1) % playlist.length;
+      this.setState({ index: newIndex });
 
-    const { download, filepath } = downloadItem(playlist[newIndex]);
-    download.then(this._onDownloadFinish(filepath));
+      const { download, filepath } = downloadItem(playlist[newIndex]);
+      download.then(this._onDownloadFinish(filepath));
+    }
   };
 
   _onDownloadFinish = filepath => {
@@ -74,10 +88,10 @@ export default class Play extends React.Component {
 
     if (delta < 200) {
       const { playing, playlist, downloading } = this.state;
-      if (playlist.length === 0 && !downloading)
-        this._downloadRecommendations();
       if (playlist.length > 0 && !playing) this._play();
       if (playlist.length > 0 && playing) this._pause();
+      if (playlist.length === 0 && !downloading)
+        this._downloadRecommendations();
     }
 
     this.setState({
@@ -85,21 +99,59 @@ export default class Play extends React.Component {
     });
   };
 
+  _updateProgressBar = () => {
+    const { playing, sound } = this.state;
+    if (playing) {
+      const duration = sound.getDuration();
+      sound.getCurrentTime(seconds => {
+        this.setState({ progress: seconds / duration });
+      });
+    }
+  };
+
   render() {
-    const { downloading, playing } = this.state;
+    const { downloading, playing, progress } = this.state;
+
     return (
-      <View style={{ flex: 1 }}>
-        <TouchableHighlight
+      <View style={[styles.container, styles.root]}>
+        <TouchableOpacity
           onPress={this._onPress}
-          underlayColor="white"
-          style={{ flex: 1, backgroundColor: 'white' }}
+          style={styles.container}
+          activeOpacity={1}
         >
-          <View style={{ flex: 1 }}>
-            {downloading && <Text>Downloading</Text>}
-            {playing && <Text>Playing</Text>}
+          <View style={styles.container}>
+            <View style={styles.text}>
+              {downloading && <Text>Downloading</Text>}
+              {playing && <Text>Playing</Text>}
+            </View>
+            <View style={styles.progress}>
+              <Progress.Bar
+                progress={progress}
+                width={null}
+                animated={false}
+                height={12}
+                borderRadius={0}
+              />
+            </View>
           </View>
-        </TouchableHighlight>
+        </TouchableOpacity>
       </View>
     );
   }
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1
+  },
+  root: {
+    padding: 50
+  },
+  text: {
+    alignItems: 'center',
+    flex: 8
+  },
+  progress: {
+    flex: 1
+  }
+});

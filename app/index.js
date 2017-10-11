@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { isSignedIn } from './lib/auth';
 import { createRootNavigation } from './routes';
 
@@ -29,7 +29,7 @@ export default class App extends React.Component {
   render() {
     if (this.state.loading) {
       return (
-        <View>
+        <View style={styles.container}>
           <Text>Loading...</Text>
         </View>
       );
@@ -39,3 +39,9 @@ export default class App extends React.Component {
     return <Layout screenProps={{ checkAuth: () => this._checkAuth() }} />;
   }
 }
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 50
+  }
+});
