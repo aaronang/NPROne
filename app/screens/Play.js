@@ -4,9 +4,12 @@ import {
   View,
   TouchableOpacity,
   StyleSheet,
-  Dimensions
+  Dimensions,
+  Button
 } from 'react-native';
 import { downloadRecommendations, downloadItem } from '../lib/media';
+import { signOut } from '../lib/auth';
+import PropTypes from 'prop-types';
 import Sound from 'react-native-sound';
 import * as Progress from 'react-native-progress';
 
@@ -138,6 +141,12 @@ export default class Play extends React.Component {
     }
   };
 
+  _signOut = () => {
+    const { navigate } = this.props.navigation;
+    this.state.sound.release();
+    signOut().then(() => navigate('SignedOut'));
+  };
+
   render() {
     return (
       <View style={[styles.container, styles.root]}>
@@ -164,12 +173,21 @@ export default class Play extends React.Component {
                 />
               </TouchableOpacity>
             </View>
+            <View>
+              <Button onPress={this._signOut} title="Sign Out" />
+            </View>
           </View>
         </TouchableOpacity>
       </View>
     );
   }
 }
+
+Play.propTypes = {
+  navigation: PropTypes.shape({
+    navigate: PropTypes.func.isRequired
+  }).isRequired
+};
 
 const padding = 50;
 const styles = StyleSheet.create({
