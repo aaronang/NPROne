@@ -1,16 +1,15 @@
-import React from "react";
-import { StackNavigator, TabNavigator } from "react-navigation";
+import { StackNavigator } from 'react-navigation';
 
-import Welcome from "./screens/Welcome";
-import Login from "./screens/Login";
+import Welcome from './screens/Welcome';
+import Login from './screens/Login';
 import Play from './screens/Play';
 
 export const SignedOut = StackNavigator({
   Welcome: {
-    screen: Welcome,
+    screen: Welcome
   },
   Login: {
-    screen: Login,
+    screen: Login
   }
 });
 
@@ -37,9 +36,9 @@ export const createRootNavigation = (authenticated = false) => {
       }
     },
     {
-      headerMode: "none",
-      mode: "modal",
-      initialRouteName: authenticated ? "SignedIn" : "SignedOut"
+      headerMode: 'none',
+      mode: 'modal',
+      initialRouteName: authenticated ? 'SignedIn' : 'SignedOut'
     }
   );
 };

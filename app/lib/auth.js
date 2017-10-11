@@ -1,42 +1,43 @@
-import { AsyncStorage } from "react-native";
-import qs from 'query-string'
+import { AsyncStorage } from 'react-native';
+import qs from 'query-string';
 
-export const AUTHENTICATED = "@NPROneStore:AUTHENTICATED";
+export const AUTHENTICATED = '@NPROneStore:AUTHENTICATED';
 // export const CSRF_TOKEN = Math.random().toString(36).substring(2)
-export const CSRF_TOKEN = 'pbfp3cs52s'
-const ACCESS_TOKEN = '@NPROneStore:ACCESS_TOKEN'
+export const CSRF_TOKEN = 'pbfp3cs52s';
+const ACCESS_TOKEN = '@NPROneStore:ACCESS_TOKEN';
 
-export const signIn = () => AsyncStorage.setItem(AUTHENTICATED, 'true')
+export const signIn = () => AsyncStorage.setItem(AUTHENTICATED, 'true');
 
-export const signOut = () => AsyncStorage.removeItem(AUTHENTICATED)
+export const signOut = () => AsyncStorage.removeItem(AUTHENTICATED);
 
-export const setAccessToken = (token) => AsyncStorage.setItem(ACCESS_TOKEN, JSON.stringify(token))
+export const setAccessToken = token =>
+  AsyncStorage.setItem(ACCESS_TOKEN, JSON.stringify(token));
 
 export const getAccessToken = async () => {
   try {
-    const accessToken = await AsyncStorage.getItem(ACCESS_TOKEN)
-    return JSON.parse(accessToken)
-  } catch (err) {
-    console.log(err)
+    const accessToken = await AsyncStorage.getItem(ACCESS_TOKEN);
+    return JSON.parse(accessToken);
+  } catch (error) {
+    console.error(error);
   }
-}
+};
 
 export const isSignedIn = async () => {
   try {
-    const res = await AsyncStorage.getItem(AUTHENTICATED)
-    return res !== null
+    const res = await AsyncStorage.getItem(AUTHENTICATED);
+    return res !== null;
   } catch (err) {
-    console.error(err)
+    console.error(err);
   }
-}
+};
 
-export const exchangeToken = async (url) => {
-  const params = qs.parse(url.split('?')[1])
-  const code = params.code
-  const state = params.state
+export const exchangeToken = async url => {
+  const params = qs.parse(url.split('?')[1]);
+  const code = params.code;
+  const state = params.state;
 
   if (CSRF_TOKEN !== state) {
-    console.error(`Expected: ${CSRF_TOKEN}\nActual: ${state}`)
+    console.error(`Expected: ${CSRF_TOKEN}\nActual: ${state}`);
   }
 
   const body = qs.stringify({
@@ -45,23 +46,23 @@ export const exchangeToken = async (url) => {
     client_secret: '3Qcafw9osRpK8Rf6sgAvhl9xlYFm4269VlkxGUn1',
     code: code,
     redirect_uri: 'com.nprone://authorize'
-  })
+  });
 
   try {
     const response = await fetch('https://api.npr.org/authorization/v2/token', {
       method: 'POST',
       headers: {
-        'Accept': 'application/json',
+        Accept: 'application/json',
         'Content-Type': 'application/x-www-form-urlencoded'
       },
       body: body
-    })
+    });
     const token = await response.json();
-    return token
+    return token;
   } catch (error) {
-    console.error(error)
+    console.error(error);
   }
-}
+};
 
 export const generateAuthUri = () => {
   const params = qs.stringify({
@@ -70,6 +71,6 @@ export const generateAuthUri = () => {
     redirect_uri: 'com.nprone://authorize',
     response_type: 'code',
     scope: 'listening.readonly'
-  })
-  return `https://api.npr.org/authorization/v2/authorize?${params}`
-}
+  });
+  return `https://api.npr.org/authorization/v2/authorize?${params}`;
+};
