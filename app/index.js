@@ -30,7 +30,7 @@ export default class App extends React.Component {
     if (this.state.loading) {
       return (
         <View style={styles.container}>
-          <Text>Loading...</Text>
+          <Text>LOADING</Text>
         </View>
       );
     }
@@ -42,6 +42,8 @@ export default class App extends React.Component {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 50
+    padding: 50,
+    flex: 1,
+    alignItems: 'center'
   }
 });

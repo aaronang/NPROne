@@ -109,9 +109,25 @@ export default class Play extends React.Component {
     }
   };
 
-  render() {
-    const { downloading, playing, progress } = this.state;
+  _getCurrentTitle = () => {
+    const { playlist, index } = this.state;
+    if (playlist.length > 0) {
+      const { title } = playlist[index];
+      return title;
+    }
+    return '';
+  };
 
+  _getStatus = () => {
+    const { downloading, playing, playlist } = this.state;
+
+    if (downloading) return 'DOWNLOADING';
+    if (playing) return 'PLAYING';
+    if (!playing && playlist.length > 0) return 'PAUSED';
+    return ' ';
+  };
+
+  render() {
     return (
       <View style={[styles.container, styles.root]}>
         <TouchableOpacity
@@ -120,17 +136,15 @@ export default class Play extends React.Component {
           activeOpacity={1}
         >
           <View style={styles.container}>
-            <View style={styles.text}>
-              {downloading && <Text>Downloading</Text>}
-              {playing && <Text>Playing</Text>}
+            <View style={styles.info}>
+              <Text style={styles.status}>{this._getStatus()}</Text>
+              <Text style={styles.title}>{this._getCurrentTitle()}</Text>
             </View>
             <View style={styles.progress}>
               <Progress.Bar
-                progress={progress}
+                progress={this.state.progress}
                 width={null}
                 animated={false}
-                height={12}
-                borderRadius={0}
               />
             </View>
           </View>
@@ -145,11 +159,19 @@ const styles = StyleSheet.create({
     flex: 1
   },
   root: {
-    padding: 50
+    padding: 50,
+    paddingTop: 200
   },
-  text: {
+  info: {
     alignItems: 'center',
-    flex: 8
+    flex: 1
+  },
+  status: {
+    fontSize: 12
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold'
   },
   progress: {
     flex: 1
