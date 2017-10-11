@@ -1,10 +1,13 @@
 import { AsyncStorage } from 'react-native';
 import qs from 'query-string';
 
-export const AUTHENTICATED = '@NPROneStore:AUTHENTICATED';
-// export const CSRF_TOKEN = Math.random().toString(36).substring(2)
-export const CSRF_TOKEN = 'pbfp3cs52s';
+const AUTHENTICATED = '@NPROneStore:AUTHENTICATED';
+
 const ACCESS_TOKEN = '@NPROneStore:ACCESS_TOKEN';
+
+const CSRF_TOKEN = Math.random()
+  .toString(36)
+  .substring(2);
 
 export const signIn = () => AsyncStorage.setItem(AUTHENTICATED, 'true');
 
@@ -32,9 +35,7 @@ export const isSignedIn = async () => {
 };
 
 export const exchangeToken = async url => {
-  const params = qs.parse(url.split('?')[1]);
-  const code = params.code;
-  const state = params.state;
+  const { code, state } = qs.parse(url.split('?')[1]);
 
   if (CSRF_TOKEN !== state) {
     console.error(`Expected: ${CSRF_TOKEN}\nActual: ${state}`);
