@@ -91,7 +91,7 @@ export default class Play extends React.Component {
   _onPress = () => {
     const delta = new Date().getTime() - this.state.lastPress;
 
-    if (delta < 200) {
+    if (delta < 400) {
       const { playing, playlist, downloading } = this.state;
       if (playlist.length > 0 && !playing) this._play();
       if (playlist.length > 0 && playing) this._pause();
@@ -143,16 +143,17 @@ export default class Play extends React.Component {
 
   _signOut = () => {
     const { navigate } = this.props.navigation;
-    this.state.sound.release();
+    const { sound } = this.state;
+    if (sound) sound.release();
     signOut().then(() => navigate('SignedOut'));
   };
 
   render() {
     return (
-      <View style={[styles.container, styles.root]}>
+      <View style={styles.container}>
         <TouchableOpacity
           onPress={this._onPress}
-          style={styles.container}
+          style={[styles.container, styles.touchable]}
           activeOpacity={1}
         >
           <View style={styles.container}>
@@ -182,8 +183,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1
   },
-  root: {
-    padding: padding,
-    paddingTop: 200
+  touchable: {
+    padding: padding
   }
 });
