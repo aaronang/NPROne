@@ -32,12 +32,12 @@ export default class Play extends React.Component {
   }
 
   componentDidMount() {
-    const timer = setInterval(() => this._updateProgressBar(), 100);
-    this.setState({ timer: timer });
+    this.mounted = true;
+    this.timer = setInterval(() => this._updateProgressBar(), 100);
   }
 
   componentWillUnmount() {
-    clearInterval(this.state.timer);
+    this._releaseResources();
   }
 
   _downloadRecommendations = async () => {
@@ -65,6 +65,8 @@ export default class Play extends React.Component {
   };
 
   _onPlayFinish = success => {
+    if (!this.mounted) return;
+
     const { sound, index, playlist } = this.state;
     this.setState({ playing: false, progress: 1 });
 
@@ -79,6 +81,7 @@ export default class Play extends React.Component {
   };
 
   _onDownloadFinish = filepath => {
+    if (!this.mounted) return;
     const sound = new Sound(filepath, undefined, error => {
       if (error) {
         console.error(error);
@@ -88,15 +91,17 @@ export default class Play extends React.Component {
     });
   };
 
-  _onPress = () => {
+  _onPress = async () => {
     const delta = new Date().getTime() - this.state.lastPress;
 
     if (delta < 400) {
       const { playing, playlist, downloading } = this.state;
       if (playlist.length > 0 && !playing) this._play();
       if (playlist.length > 0 && playing) this._pause();
-      if (playlist.length === 0 && !downloading)
-        this._downloadRecommendations();
+      if (playlist.length === 0 && !downloading) {
+        await this._downloadRecommendations();
+        this._play();
+      }
     }
 
     this.setState({
@@ -143,9 +148,15 @@ export default class Play extends React.Component {
 
   _signOut = () => {
     const { navigate } = this.props.navigation;
-    const { sound } = this.state;
-    if (sound) sound.release();
+    this._releaseResources();
     signOut().then(() => navigate('SignedOut'));
+  };
+
+  _releaseResources = () => {
+    const { sound } = this.state;
+    this.timer && clearInterval(this.timer);
+    sound && sound.release();
+    this.mounted = false;
   };
 
   render() {
