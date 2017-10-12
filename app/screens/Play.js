@@ -96,8 +96,8 @@ export default class Play extends React.Component {
 
     if (delta < 400) {
       const { playing, playlist, downloading } = this.state;
-      if (playlist.length > 0 && !playing) this._play();
-      if (playlist.length > 0 && playing) this._pause();
+      if (playlist.length > 0 && !downloading && !playing) this._play();
+      if (playlist.length > 0 && !downloading && playing) this._pause();
       if (playlist.length === 0 && !downloading) {
         await this._downloadRecommendations();
         this._play();
